@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { FiSun, FiMoon } from 'react-icons/fi'
 import '../styles/navbar.css'
 
 export default function Navbar({ darkMode, setDarkMode }) {
@@ -64,7 +65,7 @@ export default function Navbar({ darkMode, setDarkMode }) {
             onClick={() => setDarkMode(!darkMode)}
             aria-label="Toggle dark mode"
           >
-            {darkMode ? '☀️' : '🌙'}
+            {darkMode ? <FiSun /> : <FiMoon />}
           </button>
         </div>
 

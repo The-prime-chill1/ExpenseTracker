@@ -1,18 +1,40 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { FaUtensils, FaCar, FaShoppingBag, FaLightbulb, FaFilm, FaHospital, FaBook, FaMoneyBillWave, FaLaptopCode, FaChartLine } from 'react-icons/fa'
 
 const AppContext = createContext()
 
+// Icon mapping for rendering
+export const iconComponents = {
+  'FaUtensils': FaUtensils,
+  'FaCar': FaCar,
+  'FaShoppingBag': FaShoppingBag,
+  'FaLightbulb': FaLightbulb,
+  'FaFilm': FaFilm,
+  'FaHospital': FaHospital,
+  'FaBook': FaBook,
+  'FaMoneyBillWave': FaMoneyBillWave,
+  'FaLaptopCode': FaLaptopCode,
+  'FaChartLine': FaChartLine,
+}
+
+// Helper function to get icon component
+export const getIconComponent = (iconName) => {
+  if (!iconName) return <FaMoneyBillWave />
+  const IconComponent = iconComponents[iconName]
+  return IconComponent ? <IconComponent /> : <FaMoneyBillWave />
+}
+
 const defaultCategories = [
-  { id: 'cat1', name: 'Food & Dining', type: 'expense', color: '#EF4444', icon: '🍔' },
-  { id: 'cat2', name: 'Transportation', type: 'expense', color: '#F59E0B', icon: '🚗' },
-  { id: 'cat3', name: 'Shopping', type: 'expense', color: '#8B5CF6', icon: '🛍️' },
-  { id: 'cat4', name: 'Bills & Utilities', type: 'expense', color: '#EC4899', icon: '💡' },
-  { id: 'cat5', name: 'Entertainment', type: 'expense', color: '#14B8A6', icon: '🎬' },
-  { id: 'cat6', name: 'Healthcare', type: 'expense', color: '#06B6D4', icon: '🏥' },
-  { id: 'cat7', name: 'Education', type: 'expense', color: '#6366F1', icon: '📚' },
-  { id: 'cat8', name: 'Salary', type: 'income', color: '#22C55E', icon: '💰' },
-  { id: 'cat9', name: 'Freelance', type: 'income', color: '#10B981', icon: '💻' },
-  { id: 'cat10', name: 'Investment', type: 'income', color: '#3B82F6', icon: '📈' },
+  { id: 'cat1', name: 'Food & Dining', type: 'expense', color: '#EF4444', icon: 'FaUtensils' },
+  { id: 'cat2', name: 'Transportation', type: 'expense', color: '#F59E0B', icon: 'FaCar' },
+  { id: 'cat3', name: 'Shopping', type: 'expense', color: '#8B5CF6', icon: 'FaShoppingBag' },
+  { id: 'cat4', name: 'Bills & Utilities', type: 'expense', color: '#EC4899', icon: 'FaLightbulb' },
+  { id: 'cat5', name: 'Entertainment', type: 'expense', color: '#14B8A6', icon: 'FaFilm' },
+  { id: 'cat6', name: 'Healthcare', type: 'expense', color: '#06B6D4', icon: 'FaHospital' },
+  { id: 'cat7', name: 'Education', type: 'expense', color: '#6366F1', icon: 'FaBook' },
+  { id: 'cat8', name: 'Salary', type: 'income', color: '#22C55E', icon: 'FaMoneyBillWave' },
+  { id: 'cat9', name: 'Freelance', type: 'income', color: '#10B981', icon: 'FaLaptopCode' },
+  { id: 'cat10', name: 'Investment', type: 'income', color: '#3B82F6', icon: 'FaChartLine' },
 ]
 
 export function AppProvider({ children, showToast }) {
@@ -32,7 +54,31 @@ export function AppProvider({ children, showToast }) {
 
   const [categories, setCategories] = useState(() => {
     const saved = localStorage.getItem('mrchills_categories')
-    return saved ? JSON.parse(saved) : defaultCategories
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      // Check if we need to migrate old data
+      if (parsed.length > 0 && parsed[0].icon && typeof parsed[0].icon === 'string' && !parsed[0].icon.startsWith('Fa')) {
+        const migrationMap = {
+          '🍔': 'FaUtensils',
+          '🚗': 'FaCar',
+          '🛍️': 'FaShoppingBag',
+          '💡': 'FaLightbulb',
+          '🎬': 'FaFilm',
+          '🏥': 'FaHospital',
+          '📚': 'FaBook',
+          '💰': 'FaMoneyBillWave',
+          '💻': 'FaLaptopCode',
+          '📈': 'FaChartLine',
+        }
+        const migrated = parsed.map(cat => ({
+          ...cat,
+          icon: migrationMap[cat.icon] || cat.icon
+        }))
+        return migrated
+      }
+      return parsed
+    }
+    return defaultCategories
   })
 
   const [currency, setCurrency] = useState(() => {

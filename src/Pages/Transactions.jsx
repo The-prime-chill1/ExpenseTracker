@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { useApp } from '../context/AppContext'
+import { useApp, getIconComponent } from '../context/AppContext'
 import Modal from '../components/Modal'
+import { FiPlus, FiEdit2, FiTrash2, FiSearch } from 'react-icons/fi'
 import '../styles/transactions.css'
 
 export default function Transactions() {
@@ -70,17 +71,22 @@ export default function Transactions() {
       <div className="container">
         <div className="transactions-header">
           <h1>Transactions</h1>
-          <button className="btn btn-primary" onClick={() => handleOpenModal()}>+ Add Transaction</button>
+          <button className="btn btn-primary" onClick={() => handleOpenModal()}>
+            <FiPlus /> Add Transaction
+          </button>
         </div>
 
         <div className="filters-bar">
-          <input 
-            type="text" 
-            placeholder="Search transactions..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="search-input"
-          />
+          <div className="search-wrapper">
+            <FiSearch className="search-icon" />
+            <input 
+              type="text" 
+              placeholder="Search transactions..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="search-input"
+            />
+          </div>
           <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
             <option value="all">All Types</option>
             <option value="income">Income</option>
@@ -88,7 +94,7 @@ export default function Transactions() {
           </select>
           <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
             <option value="all">All Categories</option>
-            {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+            {categories.map(c => <option key={c.id} value={c.id}>{getIconComponent(c.icon)} {c.name}</option>)}
           </select>
         </div>
 
@@ -104,11 +110,19 @@ export default function Transactions() {
                   <tr key={t.id}>
                     <td>{t.date}</td>
                     <td><strong>{t.description}</strong></td>
-                    <td><span className="category-badge" style={{ background: cat?.color + '20', color: cat?.color }}>{cat?.icon} {cat?.name}</span></td>
-                    <td className={t.type === 'income' ? 'income-amount' : 'expense-amount'}>{t.type === 'income' ? '+' : '-'}{currency === 'USD' ? '$' : '€'}{t.amount.toFixed(2)}</td>
+                    <td><span className="category-badge" style={{ background: cat?.color + '20', color: cat?.color }}>
+                      {getIconComponent(cat?.icon)} {cat?.name}
+                    </span></td>
+                    <td className={t.type === 'income' ? 'income-amount' : 'expense-amount'}>
+                      {t.type === 'income' ? '+' : '-'}{currency === 'USD' ? '$' : '€'}{t.amount.toFixed(2)}
+                    </td>
                     <td>
-                      <button className="action-btn edit" onClick={() => handleOpenModal(t)}>✏️</button>
-                      <button className="action-btn delete" onClick={() => handleDelete(t.id)}>🗑️</button>
+                      <button className="action-btn edit" onClick={() => handleOpenModal(t)}>
+                        <FiEdit2 />
+                      </button>
+                      <button className="action-btn delete" onClick={() => handleDelete(t.id)}>
+                        <FiTrash2 />
+                      </button>
                     </td>
                   </tr>
                 )
@@ -129,7 +143,9 @@ export default function Transactions() {
             </select>
             <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>
               <option value="">Select Category</option>
-              {categories.filter(c => c.type === formData.type).map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+              {categories.filter(c => c.type === formData.type).map(c => (
+                <option key={c.id} value={c.id}>{getIconComponent(c.icon)} {c.name}</option>
+              ))}
             </select>
             <button className="btn btn-primary" onClick={handleSubmit}>Save</button>
           </div>

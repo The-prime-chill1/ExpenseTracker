@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useApp } from '../context/AppContext'
 import { Bar, Line } from 'react-chartjs-2'
 import { exportToPDF, exportToCSV } from '../utils/exportUtils'
+import { FiFileText, FiBarChart2, FiAlertCircle, FiCheckCircle, FiTrendingUp } from 'react-icons/fi'
+import { FaLightbulb, FaChartLine, FaPiggyBank, FaBullseye } from 'react-icons/fa'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -120,10 +122,10 @@ export default function Reports() {
             </>
           )}
           <button className="btn btn-outline" onClick={handleExportPDF}>
-            📄 Export PDF
+            <FiFileText /> Export PDF
           </button>
           <button className="btn btn-outline" onClick={handleExportCSV}>
-            📊 Export CSV
+            <FiBarChart2 /> Export CSV
           </button>
         </div>
 
@@ -164,21 +166,21 @@ export default function Reports() {
         </div>
 
         <div className="insights-card">
-          <h3>💡 Financial Insights</h3>
+          <h3><FaLightbulb /> Financial Insights</h3>
           <ul>
             {savingsRate > 20 ? (
-              <li>✅ Amazing! You're saving over 20% of your income. Keep up the great work!</li>
+              <li><FiCheckCircle style={{ color: '#22C55E' }} /> Amazing! You're saving over 20% of your income. Keep up the great work!</li>
             ) : savingsRate > 10 ? (
-              <li>📈 Good progress! Try to reach 20% savings rate for better financial security.</li>
+              <li><FiTrendingUp style={{ color: '#F59E0B' }} /> Good progress! Try to reach 20% savings rate for better financial security.</li>
             ) : (
-              <li>🎯 Focus on increasing your savings rate. Even small amounts add up over time!</li>
+              <li><FaBullseye style={{ color: '#EF4444' }} /> Focus on increasing your savings rate. Even small amounts add up over time!</li>
             )}
             {Object.keys(categoryData).length > 0 && Object.entries(categoryData).sort((a,b) => b[1] - a[1])[0] && (
-              <li>🎯 Your largest expense category is <strong>{Object.entries(categoryData).sort((a,b) => b[1] - a[1])[0][0]}</strong>. Consider reviewing this spending.</li>
+              <li><FaChartLine style={{ color: '#8B5CF6' }} /> Your largest expense category is <strong>{Object.entries(categoryData).sort((a,b) => b[1] - a[1])[0][0]}</strong>. Consider reviewing this spending.</li>
             )}
-            <li>📊 Track your progress monthly to build better financial habits.</li>
+            <li><FaPiggyBank style={{ color: '#14B8A6' }} /> Track your progress monthly to build better financial habits.</li>
             {expense > income && (
-              <li>⚠️ Your expenses exceed your income. Review your budget to avoid debt.</li>
+              <li><FiAlertCircle style={{ color: '#EF4444' }} /> Your expenses exceed your income. Review your budget to avoid debt.</li>
             )}
           </ul>
         </div>

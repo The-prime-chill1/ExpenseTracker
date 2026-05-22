@@ -1,13 +1,16 @@
-import { useApp } from '../context/AppContext'
+import { useApp, getIconComponent, iconComponents } from '../context/AppContext'
 import { useState } from 'react'
 import Modal from '../components/Modal'
+import { FiEdit2, FiTrash2, FiPlus, FiMoon, FiSun } from 'react-icons/fi'
 import '../styles/settings.css'
 
 export default function Settings({ darkMode, setDarkMode }) {
   const { categories, addCategory, editCategory, deleteCategory, currency, setCurrency } = useApp()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCat, setEditingCat] = useState(null)
-  const [catForm, setCatForm] = useState({ name: '', type: 'expense', color: '#2563EB', icon: '💰' })
+  const [catForm, setCatForm] = useState({ name: '', type: 'expense', color: '#2563EB', icon: 'FaMoneyBillWave' })
+
+  const iconOptions = Object.keys(iconComponents)
 
   const handleSaveCategory = () => {
     if (editingCat) {
@@ -17,7 +20,7 @@ export default function Settings({ darkMode, setDarkMode }) {
     }
     setIsModalOpen(false)
     setEditingCat(null)
-    setCatForm({ name: '', type: 'expense', color: '#2563EB', icon: '💰' })
+    setCatForm({ name: '', type: 'expense', color: '#2563EB', icon: 'FaMoneyBillWave' })
   }
 
   const handleDeleteCategory = (id) => {
@@ -55,23 +58,27 @@ export default function Settings({ darkMode, setDarkMode }) {
         <div className="settings-section">
           <div className="section-header">
             <h2>Categories</h2>
-            <button className="btn btn-primary" onClick={() => { setEditingCat(null); setCatForm({ name: '', type: 'expense', color: '#2563EB', icon: '💰' }); setIsModalOpen(true) }}>
-              + Add Category
+            <button className="btn btn-primary" onClick={() => { setEditingCat(null); setCatForm({ name: '', type: 'expense', color: '#2563EB', icon: 'FaMoneyBillWave' }); setIsModalOpen(true) }}>
+              <FiPlus /> Add Category
             </button>
           </div>
           <div className="categories-grid">
             {categories.map(cat => (
               <div key={cat.id} className="category-item" style={{ borderLeftColor: cat.color }}>
                 <div className="category-info">
-                  <span className="category-icon">{cat.icon}</span>
+                  <span className="category-icon">{getIconComponent(cat.icon)}</span>
                   <div>
                     <strong>{cat.name}</strong>
                     <span className="category-type">{cat.type}</span>
                   </div>
                 </div>
                 <div className="category-actions">
-                  <button onClick={() => { setEditingCat(cat); setCatForm(cat); setIsModalOpen(true) }}>✏️</button>
-                  <button onClick={() => handleDeleteCategory(cat.id)}>🗑️</button>
+                  <button onClick={() => { setEditingCat(cat); setCatForm({ ...cat }); setIsModalOpen(true) }}>
+                    <FiEdit2 />
+                  </button>
+                  <button onClick={() => handleDeleteCategory(cat.id)}>
+                    <FiTrash2 />
+                  </button>
                 </div>
               </div>
             ))}
@@ -80,13 +87,28 @@ export default function Settings({ darkMode, setDarkMode }) {
 
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingCat ? 'Edit Category' : 'New Category'}>
           <div className="modal-form">
-            <input type="text" placeholder="Category Name" value={catForm.name} onChange={(e) => setCatForm({...catForm, name: e.target.value})} />
+            <input 
+              type="text" 
+              placeholder="Category Name" 
+              value={catForm.name} 
+              onChange={(e) => setCatForm({...catForm, name: e.target.value})} 
+            />
             <select value={catForm.type} onChange={(e) => setCatForm({...catForm, type: e.target.value})}>
               <option value="expense">Expense</option>
               <option value="income">Income</option>
             </select>
-            <input type="text" placeholder="Icon (emoji)" value={catForm.icon} onChange={(e) => setCatForm({...catForm, icon: e.target.value})} />
-            <input type="color" value={catForm.color} onChange={(e) => setCatForm({...catForm, color: e.target.value})} />
+            <select value={catForm.icon} onChange={(e) => setCatForm({...catForm, icon: e.target.value})}>
+              {iconOptions.map(iconName => (
+                <option key={iconName} value={iconName}>
+                  {getIconComponent(iconName)} {iconName.replace('Fa', '')}
+                </option>
+              ))}
+            </select>
+            <input 
+              type="color" 
+              value={catForm.color} 
+              onChange={(e) => setCatForm({...catForm, color: e.target.value})} 
+            />
             <button className="btn btn-primary" onClick={handleSaveCategory}>Save</button>
           </div>
         </Modal>
