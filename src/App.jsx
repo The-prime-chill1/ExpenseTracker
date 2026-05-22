@@ -14,6 +14,7 @@ import Reports from './pages/Reports'
 import Settings from './pages/Settings'
 import Profile from './pages/Profile'
 
+
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('mrchills_theme')
