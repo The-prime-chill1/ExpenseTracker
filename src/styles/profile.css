@@ -1,0 +1,62 @@
+.profile-page {
+  padding: 2rem 0 4rem;
+}
+
+.profile-page h1 {
+  margin-bottom: 2rem;
+}
+
+.profile-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  border: 1px solid var(--border);
+  max-width: 600px;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.profile-avatar span {
+  font-size: 2rem;
+  font-weight: 600;
+  color: white;
+}
+
+.profile-form {
+  margin-bottom: 2rem;
+}
+
+.profile-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.profile-danger {
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.profile-danger h3 {
+  color: var(--danger);
+  margin-bottom: 0.5rem;
+}
+
+.profile-danger p {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+  border: none;
+}

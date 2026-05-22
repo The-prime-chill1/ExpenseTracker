@@ -1,193 +1,84 @@
-// import React, { useState, useEffect } from 'react'
-// import Navbar from './components/Navbar'
-// import Dashboard from './pages/Dashboard'
-// import Reports from './pages/Reports'
-// import { dummyTransactions } from './data/dummyData'
-// import './App.css'
-
-// function App() {
-//   const [transactions, setTransactions] = useState([])
-//   const [activePage, setActivePage] = useState('dashboard')
-//   const [notification, setNotification] = useState(null)
-
-//   // Load transactions from localStorage on mount
-//   useEffect(() => {
-//     const savedTransactions = localStorage.getItem('transactions')
-//     if (savedTransactions) {
-//       setTransactions(JSON.parse(savedTransactions))
-//     } else {
-//       setTransactions(dummyTransactions)
-//       localStorage.setItem('transactions', JSON.stringify(dummyTransactions))
-//     }
-//   }, [])
-
-//   // Save transactions to localStorage whenever they change
-//   useEffect(() => {
-//     if (transactions.length > 0) {
-//       localStorage.setItem('transactions', JSON.stringify(transactions))
-//     }
-//   }, [transactions])
-
-//   const showNotification = (message, type = 'success') => {
-//     setNotification({ message, type })
-//     setTimeout(() => setNotification(null), 3000)
-//   }
-
-//   const addTransaction = (transaction) => {
-//     const newTransaction = {
-//       ...transaction,
-//       id: Date.now(),
-//       amount: transaction.type === 'expense' ? -Math.abs(transaction.amount) : Math.abs(transaction.amount)
-//     }
-//     setTransactions([newTransaction, ...transactions])
-//     showNotification('Transaction added successfully!', 'success')
-//   }
-
-//   const updateTransaction = (updatedTransaction) => {
-//     setTransactions(transactions.map(t => 
-//       t.id === updatedTransaction.id ? updatedTransaction : t
-//     ))
-//     showNotification('Transaction updated successfully!', 'success')
-//   }
-
-//   const deleteTransaction = (id) => {
-//     if (window.confirm('Are you sure you want to delete this transaction?')) {
-//       setTransactions(transactions.filter(t => t.id !== id))
-//       showNotification('Transaction deleted successfully!', 'success')
-//     }
-//   }
-
-//   return (
-//     <div className="app">
-//       <Navbar activePage={activePage} setActivePage={setActivePage} />
-//       <main className="main-content">
-//         {activePage === 'dashboard' ? (
-//           <Dashboard 
-//             transactions={transactions}
-//             addTransaction={addTransaction}
-//             updateTransaction={updateTransaction}
-//             deleteTransaction={deleteTransaction}
-//             showNotification={showNotification}
-//           />
-//         ) : (
-//           <Reports transactions={transactions} />
-//         )}
-//       </main>
-//       {notification && (
-//         <div className={`notification notification-${notification.type}`}>
-//           {notification.message}
-//           <button onClick={() => setNotification(null)}>&times;</button>
-//         </div>
-//       )}
-//     </div>
-//   )
-// }
-
-// export default App
-
-
-import React, { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
+import Footer from './components/Footer'
+import PrivateRoute from './components/PrivateRoute'
+import Toast from './components/Toast'
+import { AppProvider } from './context/AppContext'
+import Home from './pages/Home'
+import Login from './pages/Login'
+import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
+import Transactions from './pages/Transactions'
 import Reports from './pages/Reports'
-import { dummyTransactions } from './data/dummyData'
-import './App.css'
+import Settings from './pages/Settings'
+import Profile from './pages/Profile'
 
 function App() {
-  const [transactions, setTransactions] = useState([])
-  const [activePage, setActivePage] = useState('dashboard')
-  const [notification, setNotification] = useState(null)
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('mrchills_theme')
+    return saved === 'dark' || (saved === null && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  })
+  const [toast, setToast] = useState(null)
 
-  // Load transactions from localStorage on mount
   useEffect(() => {
-    const savedTransactions = localStorage.getItem('transactions')
-    if (savedTransactions) {
-      const parsed = JSON.parse(savedTransactions)
-      if (parsed && parsed.length > 0) {
-        setTransactions(parsed)
-      } else {
-        setTransactions(dummyTransactions)
-        localStorage.setItem('transactions', JSON.stringify(dummyTransactions))
-      }
+    if (darkMode) {
+      document.documentElement.classList.add('dark')
+      localStorage.setItem('mrchills_theme', 'dark')
     } else {
-      setTransactions(dummyTransactions)
-      localStorage.setItem('transactions', JSON.stringify(dummyTransactions))
+      document.documentElement.classList.remove('dark')
+      localStorage.setItem('mrchills_theme', 'light')
     }
-  }, [])
+  }, [darkMode])
 
-  // Save transactions to localStorage whenever they change
-  useEffect(() => {
-    if (transactions.length > 0) {
-      localStorage.setItem('transactions', JSON.stringify(transactions))
-    }
-  }, [transactions])
-
-  const showNotification = (message, type = 'success') => {
-    setNotification({ message, type })
-    setTimeout(() => setNotification(null), 3000)
-  }
-
-  const addTransaction = (transactionData) => {
-    console.log('Adding transaction:', transactionData)
-    
-    const newTransaction = {
-      id: Date.now(),
-      title: transactionData.title,
-      amount: transactionData.type === 'expense' 
-        ? -Math.abs(parseFloat(transactionData.amount)) 
-        : Math.abs(parseFloat(transactionData.amount)),
-      category: transactionData.category,
-      date: transactionData.date,
-      type: transactionData.type
-    }
-    
-    console.log('New transaction object:', newTransaction)
-    setTransactions(prev => {
-      const updated = [newTransaction, ...prev]
-      console.log('Updated transactions:', updated)
-      return updated
-    })
-    showNotification('Transaction added successfully!', 'success')
-    return true
-  }
-
-  const updateTransaction = (updatedTransaction) => {
-    setTransactions(prev => 
-      prev.map(t => t.id === updatedTransaction.id ? updatedTransaction : t)
-    )
-    showNotification('Transaction updated successfully!', 'success')
-  }
-
-  const deleteTransaction = (id) => {
-    if (window.confirm('Are you sure you want to delete this transaction?')) {
-      setTransactions(prev => prev.filter(t => t.id !== id))
-      showNotification('Transaction deleted successfully!', 'success')
-    }
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 3000)
   }
 
   return (
-    <div className="app">
-      <Navbar activePage={activePage} setActivePage={setActivePage} />
-      <main className="main-content">
-        {activePage === 'dashboard' ? (
-          <Dashboard 
-            transactions={transactions}
-            addTransaction={addTransaction}
-            updateTransaction={updateTransaction}
-            deleteTransaction={deleteTransaction}
-            showNotification={showNotification}
-          />
-        ) : (
-          <Reports transactions={transactions} />
-        )}
-      </main>
-      {notification && (
-        <div className={`notification notification-${notification.type}`}>
-          <span>{notification.message}</span>
-          <button onClick={() => setNotification(null)}>&times;</button>
+    <AppProvider showToast={showToast}>
+      <BrowserRouter>
+        <div className="app-wrapper">
+          <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+          <main className="main-content">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/dashboard" element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              } />
+              <Route path="/transactions" element={
+                <PrivateRoute>
+                  <Transactions />
+                </PrivateRoute>
+              } />
+              <Route path="/reports" element={
+                <PrivateRoute>
+                  <Reports />
+                </PrivateRoute>
+              } />
+              <Route path="/settings" element={
+                <PrivateRoute>
+                  <Settings darkMode={darkMode} setDarkMode={setDarkMode} />
+                </PrivateRoute>
+              } />
+              <Route path="/profile" element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              } />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </main>
+          <Footer />
+          {toast && <Toast message={toast.message} type={toast.type} />}
         </div>
-      )}
-    </div>
+      </BrowserRouter>
+    </AppProvider>
   )
 }
 

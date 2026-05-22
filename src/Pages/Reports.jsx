@@ -1,176 +1,188 @@
-import React, { useState } from 'react'
-import { Bar } from 'react-chartjs-2'
-import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js'
-import { format, eachMonthOfInterval } from 'date-fns'
-import './Reports.css'
+import { useState } from 'react'
+import { useApp } from '../context/AppContext'
+import { Bar, Line } from 'react-chartjs-2'
+import { exportToPDF, exportToCSV } from '../utils/exportUtils'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js'
+import '../styles/reports.css'
 
-ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend)
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+)
 
-const Reports = ({ transactions }) => {
+export default function Reports() {
+  const { transactions, categories, currency } = useApp()
+  const [reportType, setReportType] = useState('monthly')
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
-  
-  const years = [...new Set(transactions.map(t => new Date(t.date).getFullYear()))].sort()
-  
-  const months = eachMonthOfInterval({
-    start: new Date(selectedYear, 0, 1),
-    end: new Date(selectedYear, 11, 31)
-  })
 
-  const monthlyData = months.map((month, index) => {
-    const monthTransactions = transactions.filter(t => {
-      const transactionDate = new Date(t.date)
-      return transactionDate.getFullYear() === selectedYear && transactionDate.getMonth() === index
+  const getReportData = () => {
+    const filtered = transactions.filter(t => {
+      const date = new Date(t.date)
+      if (reportType === 'monthly') {
+        return date.getMonth() === selectedMonth && date.getFullYear() === selectedYear
+      }
+      return true
     })
-    
-    const income = monthTransactions
-      .filter(t => t.amount > 0)
-      .reduce((sum, t) => sum + t.amount, 0)
-    
-    const expenses = monthTransactions
-      .filter(t => t.amount < 0)
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0)
-    
-    return { income, expenses }
-  })
 
-  const chartData = {
-    labels: months.map(date => format(date, 'MMM')),
-    datasets: [
-      {
-        label: 'Income',
-        data: monthlyData.map(d => d.income),
-        backgroundColor: '#22c55e',
-        borderRadius: 8,
-      },
-      {
-        label: 'Expenses',
-        data: monthlyData.map(d => d.expenses),
-        backgroundColor: '#ef4444',
-        borderRadius: 8,
-      }
-    ]
+    const income = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
+    const expense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
+    const savings = income - expense
+    const savingsRate = income > 0 ? (savings / income) * 100 : 0
+
+    const categoryData = {}
+    filtered.filter(t => t.type === 'expense').forEach(t => {
+      const cat = categories.find(c => c.id === t.category)
+      if (cat) categoryData[cat.name] = (categoryData[cat.name] || 0) + t.amount
+    })
+
+    return { filtered, income, expense, savings, savingsRate, categoryData }
   }
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-        labels: {
-          color: getComputedStyle(document.body).getPropertyValue('--text-primary').trim(),
-          font: { size: 12 }
-        }
-      },
-      tooltip: {
-        callbacks: {
-          label: (context) => `${context.dataset.label}: $${context.raw.toFixed(2)}`
-        }
-      }
-    },
-    scales: {
-      y: {
-        grid: { color: 'rgba(148, 163, 184, 0.1)' },
-        ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-secondary').trim() }
-      },
-      x: {
-        grid: { display: false },
-        ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-secondary').trim() }
-      }
-    }
+  const { income, expense, savings, savingsRate, categoryData } = getReportData()
+
+  const barData = {
+    labels: Object.keys(categoryData),
+    datasets: [{
+      label: 'Spending by Category',
+      data: Object.values(categoryData),
+      backgroundColor: '#2563EB',
+      borderRadius: 8,
+    }]
   }
 
-  const totalIncome = transactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0)
-  const totalExpenses = transactions.filter(t => t.amount < 0).reduce((sum, t) => sum + Math.abs(t.amount), 0)
-  const savings = totalIncome - totalExpenses
-  const savingsRate = totalIncome > 0 ? ((savings / totalIncome) * 100).toFixed(1) : 0
+  const weeklyData = {
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    datasets: [{
+      label: 'Daily Spending',
+      data: [45, 32, 78, 23, 56, 120, 89],
+      borderColor: '#EF4444',
+      backgroundColor: 'rgba(239, 68, 68, 0.1)',
+      fill: true,
+      tension: 0.4,
+    }]
+  }
 
-  const exportReport = () => {
-    const csvData = transactions.map(t => ({
-      Date: t.date,
-      Title: t.title,
-      Category: t.category,
-      Type: t.amount > 0 ? 'Income' : 'Expense',
-      Amount: `$${Math.abs(t.amount).toFixed(2)}`
-    }))
-    
-    const headers = Object.keys(csvData[0])
-    const csvRows = [
-      headers.join(','),
-      ...csvData.map(row => headers.map(h => `"${row[h]}"`).join(','))
-    ]
-    
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `expense-report-${selectedYear}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
+  const handleExportPDF = () => {
+    exportToPDF({ 
+      income, 
+      expense, 
+      savings, 
+      savingsRate,
+      categoryData, 
+      reportType, 
+      currency 
+    })
+  }
+
+  const handleExportCSV = () => {
+    exportToCSV(transactions)
   }
 
   return (
-    <div className="reports">
-      <div className="reports-header">
-        <h1>Monthly Reports</h1>
-        <div className="report-actions">
-          <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
-            {years.map(year => (
-              <option key={year} value={year}>{year}</option>
-            ))}
+    <div className="reports-page">
+      <div className="container">
+        <h1>Financial Reports</h1>
+        
+        <div className="report-controls">
+          <select value={reportType} onChange={(e) => setReportType(e.target.value)}>
+            <option value="monthly">Monthly Report</option>
+            <option value="yearly">Yearly Report</option>
           </select>
-          <button onClick={exportReport} className="export-btn">
-            Export Report
+          {reportType === 'monthly' && (
+            <>
+              <select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
+                {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((m, i) => (
+                  <option key={i} value={i}>{m}</option>
+                ))}
+              </select>
+              <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
+                {[2023, 2024, 2025].map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+            </>
+          )}
+          <button className="btn btn-outline" onClick={handleExportPDF}>
+            📄 Export PDF
+          </button>
+          <button className="btn btn-outline" onClick={handleExportCSV}>
+            📊 Export CSV
           </button>
         </div>
-      </div>
 
-      <div className="summary-stats">
-        <div className="stat-item">
-          <span className="stat-label">Total Income</span>
-          <span className="stat-value income">${totalIncome.toFixed(2)}</span>
+        <div className="report-summary">
+          <div className="summary-card">
+            <span>Total Income</span>
+            <strong className="income">+{currency === 'USD' ? '$' : '€'}{income.toFixed(2)}</strong>
+          </div>
+          <div className="summary-card">
+            <span>Total Expenses</span>
+            <strong className="expense">-{currency === 'USD' ? '$' : '€'}{expense.toFixed(2)}</strong>
+          </div>
+          <div className="summary-card">
+            <span>Net Savings</span>
+            <strong className={savings >= 0 ? 'income' : 'expense'}>
+              {savings >= 0 ? '+' : '-'}{currency === 'USD' ? '$' : '€'}{Math.abs(savings).toFixed(2)}
+            </strong>
+          </div>
+          <div className="summary-card">
+            <span>Savings Rate</span>
+            <strong>{savingsRate.toFixed(1)}%</strong>
+          </div>
         </div>
-        <div className="stat-item">
-          <span className="stat-label">Total Expenses</span>
-          <span className="stat-value expense">${totalExpenses.toFixed(2)}</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-label">Net Savings</span>
-          <span className={`stat-value ${savings >= 0 ? 'income' : 'expense'}`}>
-            ${savings.toFixed(2)}
-          </span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-label">Savings Rate</span>
-          <span className="stat-value">{savingsRate}%</span>
-        </div>
-      </div>
 
-      <div className="chart-container card">
-        <h3>Monthly Income vs Expenses - {selectedYear}</h3>
-        <div className="bar-chart-wrapper">
-          <Bar data={chartData} options={options} />
+        <div className="report-charts">
+          <div className="chart-card">
+            <h3>Spending by Category</h3>
+            {Object.keys(categoryData).length > 0 ? (
+              <Bar data={barData} options={{ responsive: true, maintainAspectRatio: false }} />
+            ) : (
+              <div className="empty-state">No expense data for this period</div>
+            )}
+          </div>
+          <div className="chart-card">
+            <h3>Weekly Spending Trend</h3>
+            <Line data={weeklyData} options={{ responsive: true, maintainAspectRatio: false }} />
+          </div>
         </div>
-      </div>
 
-      <div className="recent-transactions card">
-        <h3>Recent Transactions</h3>
-        <div className="recent-list">
-          {transactions.slice(0, 10).map(t => (
-            <div key={t.id} className="recent-item">
-              <div>
-                <div className="recent-title">{t.title}</div>
-                <div className="recent-date">{format(new Date(t.date), 'MMM dd, yyyy')}</div>
-              </div>
-              <div className={`recent-amount ${t.amount > 0 ? 'income' : 'expense'}`}>
-                {t.amount > 0 ? '+' : '-'}${Math.abs(t.amount).toFixed(2)}
-              </div>
-            </div>
-          ))}
+        <div className="insights-card">
+          <h3>💡 Financial Insights</h3>
+          <ul>
+            {savingsRate > 20 ? (
+              <li>✅ Amazing! You're saving over 20% of your income. Keep up the great work!</li>
+            ) : savingsRate > 10 ? (
+              <li>📈 Good progress! Try to reach 20% savings rate for better financial security.</li>
+            ) : (
+              <li>🎯 Focus on increasing your savings rate. Even small amounts add up over time!</li>
+            )}
+            {Object.keys(categoryData).length > 0 && Object.entries(categoryData).sort((a,b) => b[1] - a[1])[0] && (
+              <li>🎯 Your largest expense category is <strong>{Object.entries(categoryData).sort((a,b) => b[1] - a[1])[0][0]}</strong>. Consider reviewing this spending.</li>
+            )}
+            <li>📊 Track your progress monthly to build better financial habits.</li>
+            {expense > income && (
+              <li>⚠️ Your expenses exceed your income. Review your budget to avoid debt.</li>
+            )}
+          </ul>
         </div>
       </div>
     </div>
   )
 }
-
-export default Reports
