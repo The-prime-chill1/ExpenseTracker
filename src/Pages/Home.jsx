@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { 
   FiTrendingUp, 
   FiTarget, 
@@ -10,12 +10,24 @@ import {
   FiAward,
   FiArrowRight 
 } from 'react-icons/fi'
-// import '../styles/home.css'
 import '../styles/home.css'
 
 export default function Home() {
   const featuresRef = useRef(null)
+  const [isMobile, setIsMobile] = useState(false)
 
+  // Check if mobile for better UX
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Intersection Observer for fade-up animations
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -23,11 +35,22 @@ export default function Home() {
           entry.target.classList.add('visible')
         }
       })
-    }, { threshold: 0.1 })
+    }, { threshold: 0.1, rootMargin: '50px' }) // Added rootMargin for better triggering
 
-    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el))
+    const fadeElements = document.querySelectorAll('.fade-up')
+    fadeElements.forEach(el => observer.observe(el))
+    
     return () => observer.disconnect()
   }, [])
+
+  // Smooth scroll for anchor links
+  const handleGetStarted = (e) => {
+    e.preventDefault()
+    const pricingSection = document.querySelector('.pricing')
+    if (pricingSection) {
+      pricingSection.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
 
   return (
     <>
@@ -36,12 +59,16 @@ export default function Home() {
         <div className="container">
           <div className="hero-content fade-up">
             <div className="hero-badge">
-              <FiAward size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+              <FiAward size={isMobile ? 12 : 14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
               <span>#1 Smart Expense Tracker</span>
             </div>
             <h1 className="hero-title">
-              Take Control of Your<br />
-              <span className="gradient-text">Financial Future</span>
+              {/* Responsive line break */}
+              {isMobile ? (
+                <>Take Control of Your<br /><span className="gradient-text">Financial Future</span></>
+              ) : (
+                <>Take Control of Your<br /><span className="gradient-text">Financial Future</span></>
+              )}
             </h1>
             <p className="hero-subtitle">
               Join 50,000+ chill users who track their expenses effortlessly with Mr. Chills. 
@@ -87,7 +114,11 @@ export default function Home() {
           </div>
           <div className="features-grid">
             {features.map((feature, i) => (
-              <div key={i} className="feature-card fade-up" style={{ animationDelay: `${i * 0.1}s` }}>
+              <div 
+                key={i} 
+                className="feature-card fade-up" 
+                style={{ animationDelay: `${Math.min(i * 0.1, 0.5)}s` }} // Cap delay at 0.5s
+              >
                 <div className="feature-icon">{feature.icon}</div>
                 <h3>{feature.title}</h3>
                 <p>{feature.desc}</p>
@@ -97,7 +128,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="pricing">
+      <section className="pricing" id="pricing">
         <div className="container">
           <div className="section-header fade-up">
             <span className="section-badge">Pricing</span>
@@ -139,7 +170,9 @@ export default function Home() {
           <div className="cta-card fade-up">
             <h2>Ready to take control of your finances?</h2>
             <p>Join thousands of users who've transformed their financial habits with Mr. Chills.</p>
-            <Link to="/signup" className="btn btn-primary cta-btn">Start Tracking Free <FiArrowRight style={{ marginLeft: '6px', verticalAlign: 'middle' }} /></Link>
+            <Link to="/signup" className="btn btn-primary cta-btn">
+              Start Tracking Free <FiArrowRight style={{ marginLeft: '6px', verticalAlign: 'middle' }} />
+            </Link>
           </div>
         </div>
       </section>

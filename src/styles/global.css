@@ -1,22 +1,44 @@
 @import './variables.css';
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
 .app-wrapper {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  position: relative;
 }
 
 .main-content {
   flex: 1;
   padding-top: 80px;
+  width: 100%;
 }
 
 .container {
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 2rem;
+  width: 100%;
 }
 
+/* Responsive container padding */
 @media (max-width: 768px) {
   .container {
     padding: 0 1.25rem;
@@ -26,6 +48,16 @@
   }
 }
 
+@media (max-width: 480px) {
+  .container {
+    padding: 0 1rem;
+  }
+  .main-content {
+    padding-top: 60px;
+  }
+}
+
+/* Button improvements for mobile */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -41,6 +73,25 @@
   font-family: inherit;
   background: transparent;
   color: var(--text-primary);
+  white-space: nowrap;
+}
+
+/* Make buttons responsive */
+@media (max-width: 640px) {
+  .btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.8125rem;
+    white-space: normal;
+    word-break: keep-all;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    width: 100%;
+  }
 }
 
 .btn-primary {
@@ -54,6 +105,16 @@
   box-shadow: 0 6px 20px 0 rgba(37, 99, 235, 0.4);
 }
 
+/* Disable hover effects on touch devices */
+@media (hover: none) {
+  .btn-primary:hover {
+    transform: none;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+  }
+}
+
 .btn-outline {
   border: 1.5px solid var(--border);
   background: transparent;
@@ -64,12 +125,14 @@
   background: rgba(37, 99, 235, 0.05);
 }
 
+/* Card improvements */
 .card {
   background: var(--bg-card);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   transition: var(--transition);
   overflow: hidden;
+  width: 100%;
 }
 
 .card:hover {
@@ -77,6 +140,13 @@
   box-shadow: var(--shadow-lg);
 }
 
+@media (max-width: 768px) {
+  .card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* Glass effect */
 .glass {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
@@ -87,6 +157,7 @@
   background: rgba(15, 23, 42, 0.5);
 }
 
+/* Form inputs */
 input, select, textarea {
   width: 100%;
   padding: 0.75rem 1rem;
@@ -98,10 +169,134 @@ input, select, textarea {
   transition: var(--transition);
 }
 
+@media (max-width: 640px) {
+  input, select, textarea {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+  }
+}
+
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Image responsiveness */
+img, video, iframe, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Grid utilities */
+.grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Responsive grids */
+@media (max-width: 1024px) {
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-cols-3, .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-cols-3, .grid-cols-4, .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Flex utilities */
+.flex {
+  display: flex;
+  gap: 1rem;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+/* Responsive flex */
+@media (max-width: 768px) {
+  .flex-responsive {
+    flex-direction: column;
+  }
+}
+
+/* Text utilities */
+.text-center {
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .text-sm-responsive {
+    font-size: 0.875rem;
+  }
+  .text-xs-responsive {
+    font-size: 0.75rem;
+  }
+}
+
+/* Spacing utilities */
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+
+.p-1 { padding: 0.5rem; }
+.p-2 { padding: 1rem; }
+.p-3 { padding: 1.5rem; }
+.p-4 { padding: 2rem; }
+
+/* Responsive spacing */
+@media (max-width: 768px) {
+  .mb-4 { margin-bottom: 1.5rem; }
+  .mt-4 { margin-top: 1.5rem; }
+  .p-4 { padding: 1.5rem; }
 }
 
 /* Animations */
@@ -132,7 +327,7 @@ input:focus, select:focus, textarea:focus {
   border-radius: 0.5rem;
 }
 
-/* Scrollbar */
+/* Scrollbar - keep your existing scrollbar styles */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -149,4 +344,37 @@ input:focus, select:focus, textarea:focus {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
+}
+
+/* Utility to prevent overflow */
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
+/* Responsive tables */
+@media (max-width: 768px) {
+  .table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Hide on mobile */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+/* Show only on mobile */
+@media (min-width: 769px) {
+  .show-mobile {
+    display: none !important;
+  }
 }
