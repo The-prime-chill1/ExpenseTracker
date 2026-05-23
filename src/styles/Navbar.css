@@ -53,6 +53,7 @@
   color: var(--text-primary);
   text-decoration: none;
   white-space: nowrap;
+  z-index: 1001; /* Ensure logo stays above mobile menu */
 }
 
 /* Logo responsive */
@@ -119,6 +120,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 /* Theme toggle responsive */
@@ -177,12 +179,14 @@
     background: var(--bg-card);
     padding: 2rem;
     gap: 1.5rem;
-    transition: all 0.3s ease-in-out;
+    transition: left 0.3s ease-in-out; /* Only animate left property for performance */
     box-shadow: var(--shadow-lg);
     border-bottom: 1px solid var(--border);
     align-items: center;
     backdrop-filter: blur(10px);
     z-index: 999;
+    height: calc(100vh - 70px); /* Full height menu */
+    overflow-y: auto; /* Allow scrolling if many items */
   }
   
   /* Dark mode mobile menu */
@@ -200,17 +204,26 @@
   .nav-cta {
     width: 100%;
     text-align: center;
-    padding: 0.75rem;
+    padding: 0.875rem;
     font-size: 1rem;
+    border-radius: var(--radius-md);
+  }
+  
+  /* Add visual separation between items */
+  .nav-links a:not(:last-child),
+  .nav-logout-btn:not(:last-child) {
+    border-bottom: 1px solid var(--border);
   }
   
   .nav-cta {
-    padding: 0.75rem !important;
+    padding: 0.875rem !important;
+    margin-top: 0.5rem;
   }
   
   /* Adjust spacing for scrolled state */
   .navbar.scrolled .nav-links {
     top: 68px;
+    height: calc(100vh - 68px);
   }
   
   /* Animation for menu items */
@@ -227,12 +240,14 @@
     transform: translateX(0);
   }
   
-  /* Stagger animation */
+  /* Stagger animation - improved with max delay */
   .nav-links.active a:nth-child(1) { transition-delay: 0.05s; }
   .nav-links.active a:nth-child(2) { transition-delay: 0.1s; }
   .nav-links.active a:nth-child(3) { transition-delay: 0.15s; }
   .nav-links.active a:nth-child(4) { transition-delay: 0.2s; }
-  .nav-links.active button { transition-delay: 0.25s; }
+  .nav-links.active a:nth-child(5) { transition-delay: 0.25s; }
+  .nav-links.active a:nth-child(6) { transition-delay: 0.3s; }
+  .nav-links.active button { transition-delay: 0.35s; }
   
   /* Hamburger animation */
   .mobile-menu-btn.active span:nth-child(1) {
@@ -254,16 +269,18 @@
     top: 60px;
     padding: 1.5rem;
     gap: 1rem;
+    height: calc(100vh - 60px);
   }
   
   .navbar.scrolled .nav-links {
     top: 58px;
+    height: calc(100vh - 58px);
   }
   
   .nav-links a, 
   .nav-logout-btn,
   .nav-cta {
-    padding: 0.6rem;
+    padding: 0.75rem;
     font-size: 0.9rem;
   }
   
@@ -304,4 +321,13 @@ body.menu-open {
   .nav-logout-btn:hover::after {
     width: 100%;
   }
+}
+
+/* Accessibility: Focus states for keyboard navigation */
+.nav-links a:focus-visible,
+.nav-logout-btn:focus-visible,
+.mobile-menu-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
