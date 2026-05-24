@@ -16,7 +16,7 @@ import {
   Legend,
   Filler
 } from 'chart.js'
-import '../styles/reports.css'
+import '../styles/Reports.css'
 
 ChartJS.register(
   CategoryScale,
