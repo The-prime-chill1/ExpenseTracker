@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useApp, getIconComponent } from '../context/AppContext'
-import Modal from '../components/Modal'
+import Modal from '../Components/Modal'
 import { FiPlus, FiEdit2, FiTrash2, FiSearch } from 'react-icons/fi'
 import '../styles/transactions.css'
 

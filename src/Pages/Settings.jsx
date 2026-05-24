@@ -1,6 +1,6 @@
 import { useApp, getIconComponent, iconComponents } from '../context/AppContext'
 import { useState } from 'react'
-import Modal from '../components/Modal'
+import Modal from '../Components/Modal'
 import { FiEdit2, FiTrash2, FiPlus, FiMoon, FiSun } from 'react-icons/fi'
 import '../styles/settings.css'
 

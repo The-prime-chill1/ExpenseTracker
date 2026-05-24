@@ -216,7 +216,7 @@ import { Line, Doughnut } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement, Filler } from 'chart.js'
 import { useEffect, useState } from 'react'
 import { FiDollarSign, FiTrendingUp, FiTrendingDown, FiArrowRight } from 'react-icons/fi'
-import '../styles/dashboard.css'
+import '../styles/Dashboard.css'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement, Filler)
 

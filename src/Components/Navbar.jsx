@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { FiSun, FiMoon } from 'react-icons/fi'
-import '../styles/navbar.css'
+import '../styles/Navbar.css'
 
 export default function Navbar({ darkMode, setDarkMode }) {
   const [isScrolled, setIsScrolled] = useState(false)
